@@ -2,51 +2,97 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>단어 무작위 섞기</title>
+    <title>shuffle word multi</title>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; padding: 30px; background-color: #f4f7f6; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 500px; }
-        input { padding: 10px; width: 70%; border: 1px solid #ddd; border-radius: 4px; }
+        .main-container { max-width: 800px; margin: auto; }
+        h2 { text-align: center; color: #2c3e50; }
+        
+        /* 각 셔플 세트 스타일 */
+        .shuffle-box { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            margin-bottom: 20px; 
+            border-left: 5px solid #3498db;
+        }
+        .shuffle-title { font-weight: bold; margin-bottom: 10px; color: #3498db; display: block; }
+        
+        .input-group { display: flex; gap: 10px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
         button { padding: 10px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #2980b9; }
-        #result { margin-top: 25px; font-size: 1.1em; word-break: break-all; color: #4c516d; }
+        
+        .result { margin-top: 15px; font-size: 1.1em; word-break: break-all; color: #4c516d; min-height: 1.2em; }
+        
+        .admin-buttons { text-align: center; margin-top: 20px; }
+        .add-btn { background-color: #2ecc71; padding: 12px 25px; font-size: 1em; }
+        .add-btn:hover { background-color: #27ae60; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>텍스트 셔플기</h2>
-        <input type="text" id="userInput" placeholder="문장을 입력하고 버튼을 누르세요">
-        <button onclick="shuffleText()">섞기</button>
-        <div id="result"></div>
+    <div class="main-container">
+        <h2>단어 무작위 섞기 (멀티)</h2>
+        
+        <div id="container-root"></div>
+
+        <div class="admin-buttons">
+            <button class="add-btn" onclick="addShuffleBox()">+ 셔플 칸 추가하기</button>
+        </div>
     </div>
 
     <script>
-        function shuffleText() {
-            const input = document.getElementById('userInput').value;
-            const resultDiv = document.getElementById('result');
+        let boxCount = 0;
+
+        // 1. 새로운 셔플 입력 칸 세트를 추가하는 함수
+        function addShuffleBox() {
+            boxCount++;
+            const root = document.getElementById('container-root');
+            
+            const box = document.createElement('div');
+            box.className = 'shuffle-box';
+            box.id = `box-${boxCount}`;
+            
+            box.innerHTML = `
+                <span class="shuffle-title">셔플 ${boxCount}</span>
+                <div class="input-group">
+                    <input type="text" id="input-${boxCount}" placeholder="문장을 입력하세요">
+                    <button onclick="shuffleText(${boxCount})">섞기</button>
+                </div>
+                <div id="result-${boxCount}" class="result"></div>
+            `;
+            
+            root.appendChild(box);
+        }
+
+        // 2. 특정 번호의 입력창 내용을 섞는 함수
+        function shuffleText(id) {
+            const input = document.getElementById(`input-${id}`).value;
+            const resultDiv = document.getElementById(`result-${id}`);
 
             if (!input.trim()) {
                 resultDiv.innerText = "내용을 입력해 주세요.";
+                resultDiv.style.color = "#e74c3c";
                 return;
             }
 
-            // 1. 공백 기준 분리
+            resultDiv.style.color = "#4c516d";
             let words = input.split(/\s+/).filter(w => w !== "");
 
-            // 2. 무작위 섞기 (Fisher-Yates)
+            // Fisher-Yates 셔플 알고리즘
             for (let i = words.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [words[i], words[j]] = [words[j], words[i]];
             }
 
-            // 3. (단어1, 단어2, ...) 형식으로 가공
-            // join(', ')으로 단어 사이를 쉼표로 잇고 앞뒤에 괄호를 붙입니다.
             const formattedResult = "(" + words.join(', ') + ")";
-
-            // 4. 화면 출력
             resultDiv.innerText = formattedResult;
         }
+
+        // 초기 실행 시 3개의 칸을 기본으로 생성
+        for(let i=0; i<3; i++) addShuffleBox();
     </script>
 
 </body>
